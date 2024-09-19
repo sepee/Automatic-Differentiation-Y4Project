@@ -1,0 +1,8 @@
+Chain Rule         : (f(g(x)))'     = f'(g(x)) * g'(x)
+Product Rule       : (f(x) * g(x))' = f'(x)*g(x) + f(x)g'(x)
+Quotient Rule      : (f(x) / g(x))' = (f'(x)*g(x) - f(x)g'(x)) / g(x)^2
+Sum Rule           : (f(x) + g(x))' = f'(x) + g'(x)
+General Power Rule : (f(x)^g(x))'   = f(x)^g(x) * (g(x) * f'(x) / f(x) + g'(x) ln(x))
+
+Constant Rule      : c'             = 0
+power Rule         : (x^n)'         = n * x^(n - 1)
