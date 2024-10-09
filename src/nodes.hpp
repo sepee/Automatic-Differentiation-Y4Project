@@ -1,149 +1,188 @@
 // NODES
+#include <stdint.h>
 #include <string>
+#include <array>
 
 //#include <eigen3/Eigen>  // for working with vectors and matrices later
 
 // DECLARATIONS
-template <typename pointerType> int16;
-int maximum_number_operations = 25;
-int maximum_number_sections_and_ops = 2*maximum_number_operations + 1;  //e.g. x + y * z = 5 sections (where there are 2 operations)
+//using pointerType = int16;
+constexpr int maximum_number_operations = 25;
+constexpr int maximum_number_sections_and_ops = 2*maximum_number_operations + 1;  //e.g. x + y * z = 5 sections (where there are 2 operations)
 
 
 class BaseNode {
 
 	private:
+		int id;
+		int id_parent;
+		std::array<int, 2> id_children;
 		std::string derivative = "";  // or expression
 
 
-		auto Evaluate() {
-			// evaluate children
+		std::array<int, 2> Evaluate() {
+			// evaluate children, returns ids of children objects
+			return {0, 0};
 		};
 
-		auto Derive(this) {
+		void Derive() {
 			// find derivative of this node (using children derivatives)
+			std::string d = "something calculated";
+			setDerivative(d);
 		};
 
 	public:
-		std::string getDerivative(this) {
+		std::string getDerivative() {
+			derivative = "something";  // TODO(Otis)
 			return derivative;
 		}
-		void setDerivative(this, d) {
-			this.derivative = d;
+
+		void setDerivative(std::string d) {
+			this->derivative = d;
+		}
+
+		int getID() {
+			return this->id;
+		}
+
+		void setID(int i) {
+			this->id = i;
+		}
+
+		int getIDparent() {
+			return this->id_parent;
+		}
+
+		void setIDparent(int i) {
+			this->id_parent = i;
+		}
+
+		std::array<int, 2> getIDchildren() {
+			return this->id_children;
+		}
+
+		void setIDchildren(std::array<int, 2> c) {
+			this->id_children = c;
 		}
 		
 }; // END BaseNode class
 
 // ------------------------------ OPERATIONS --------------------------------------
-class Operation(BaseNode) {
+class Operation : public BaseNode {
 
-	private:
+	//private:
 
 	public:
-		auto Evaluate(this) {
-			// evaluate children
+		std::array<int, 2> Evaluate() {
+			// evaluate children, returns ids of children objects
+			return {0, 0};
 		}
 
 
 }; // END Operation class
 
-class Binary(Operation) {
+class Binary : public Operation {
 
 	private:
-		std::string[2] branches;  // branches to 2 children (always 2 children for simplicity)
+		std::array<int, 2> id_children;  // duplicated idea - id_children / branches
+		std::array<std::string, 2> branches;  // branches to 2 children (always 2 children for simplicity)
 
 	public:
-		auto getChildren(this) {
-			return branches;
+		std::array<std::string, 2> getChildren() {
+			return this->branches;
 		}
 
 
 }; // END Binary(Operation) class
 
-class Unary(Operation) {
+class Unary : public Operation {
 
 	private:
-		std::string[1] branches;  // branches to 2 children (always 2 children for simplicity)
+		std::array<int, 1> id_children;
+		std::array<std::string, 1> branches;  // branches to 2 children (always 2 children for simplicity)
 
 	public:
-		auto getChildren(this) {
-			return branches;
+		std::array<std::string, 1> getChildren() {
+			return this->branches;
 		}
 
 
 }; // END Unary(Operation) class
 
-class Add(Binary) {
+class Add : public Binary {
 
 }; // END Add(Binary) class
 
-class Subtract(Binary) {
+class Subtract : public Binary {
 
 }; // END Subtract(Binary) class
 
-class Multiply(Binary) {
+class Multiply : public Binary {
 
 }; // END Multiply(Binary) class
 
-class Divide(Binary) {
+class Divide : public Binary {
 
 }; // END Divide(Binary) class
 
-class Sin(Unary) {
+class Sin : public Unary {
 
 }; // END Sin(Unary) class
 
-class Cos(Unary) {
+class Cos : public Unary {
 
 }; // END Cos(Unary) class
 
-class Exponential(Unary) {
+class Exponential : public Unary {
 
 }; // END Exponential(Unary) class
 
-class NaturalLog(Unary) {
+class NaturalLog : public Unary {
 
 }; // END NaturalLog(Unary) class
 
 
 // ------------------------------ EXPRESSIONS --------------------------------------
-class Expression(BaseNode) {
+class Expression : public BaseNode {
 
-	private:
+	//private:
 
 	public:
-		auto Evaluate(this) {
-			// evaluate children
-		}
+		std::array<int, 2> Evaluate() {
+			// evaluate children, returns ids of children objects
+			return {0, 0};
+		};
 
 
 }; // END Expression class
 
-class Symbol(Expression) {
+class Symbol : public Expression {
 
 	private:
+		std::array<std::string, 1> branches;  // branches to 2 children (always 2 children for simplicity)
 
 	public:
-		auto getChildren(this) {
-			return branches;
+		std::array<std::string, 1> getChildren() { // TODO(Otis) check return type
+			return this->branches;
 		}
 
 
 }; // END Symbol(Expression) class
 
-class Number(Expression) {
+class Number : public Expression {
 
 	private:
-		std::string[1] branches;  // branches to 2 children (always 2 children for simplicity)
+		std::array<std::string, 1> branches;  // branches to 2 children (always 2 children for simplicity)
 
 	public:
-		auto getChildren(this) {
-			return branches;
+		std::array<std::string, 1> getChildren() {
+			return this->branches;
 		}
 
 
 }; // END Number(Expression) class
 
-class X(Symbol) {
+class X : public Symbol {
 
 }; // END X(Symbol) class
 
