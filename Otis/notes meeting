@@ -9,3 +9,5 @@ suggestions:
     - do more literature review
         - specifically look at non-tree computational grpahs
         - specifically look at vector calc related to it
+    - make automaic tree diagram of graph
+        - animate this tree diagram to show steps of the algorithm
