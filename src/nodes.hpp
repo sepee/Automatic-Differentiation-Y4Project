@@ -14,11 +14,15 @@ constexpr int maximum_number_sections_and_ops = 2*maximum_number_operations + 1;
 class BaseNode {
 
 	private:
-		int id;
-		int id_parent;
+		int _id;
+		int _id_parent;
 		//std::array<int, 2> id_children;
-		int id_children_a;
-		int id_children_b;
+		int _id_children_a;
+		int _id_children_b;
+		std::string _derivative;
+		std::string _s;
+		float _v = 0;
+		int _p = 0;
 
 		std::array<int, 2> Evaluate() {
 			// evaluate children, returns ids of children objects
@@ -29,53 +33,81 @@ class BaseNode {
 			// forward differentiate
 		}
 
-		void Derive() {
+		std::string Derive() {
 			// find derivative of this node (using children derivatives)
 			std::string d = "something calculated";
 			setDerivative(d);
+			return d;
 		};
 
 	public:
 		BaseNode(int id) {  // Constructor - TODO(Catherine) define contructor with string and value for all classes
 			_id = id;
+			_s = "[BASE NODE]";
 		}
 
-		void getString() { // __str__ replacement
-			s = "";
-			// display string
+		std::string getString() { // __str__ replacement
+			return this->_s;
+		}
+
+		void setString(std::string s) {
+			this->_s = s;
+		}
+
+		float getValue() {
+			return this->_v;
+		}
+
+		void setValue(float v) {
+			this->_v = v;
+		}
+
+		int getPartial() {
+			return this->_p;
+		}
+
+		void setPartial(int p) {
+			this->_p = p;
 		}
 
 		std::string getDerivative() {
-			derivative = "something";  // TODO(Otis)
-			return derivative;
+			return "something";  // TODO(Otis)
 		}
 
 		void setDerivative(std::string d) {
-			this->derivative = d;
+			this->_derivative = d;
 		}
 
 		int getID() {
-			return this->id;
+			return this->_id;
 		}
 
 		void setID(int i) {
-			this->id = i;
+			this->_id = i;
 		}
 
 		int getIDparent() {
-			return this->id_parent;
+			return this->_id_parent;
 		}
 
 		void setIDparent(int i) {
-			this->id_parent = i;
+			this->_id_parent = i;
 		}
 
+		//std::pair<int, int> getIDchildren() {
+		//	return std::pair(this->_id_children_a, this->_id_children_b);
+		//}
+
 		std::array<int, 2> getIDchildren() {
-			return this->id_children;
+			std::array<int, 2> children;
+			children[0] = this->_id_children_a;
+			children[1] = this->_id_children_b;
+			return children;
 		}
 
 		void setIDchildren(std::array<int, 2> c) {
-			this->id_children = c;
+			this->_id_children_a = c[0];
+			this->_id_children_b = c[1];
 		}
 		
 }; // END BaseNode class
@@ -128,11 +160,19 @@ class Unary : public Operation {
 
 class Add : public Binary {
 
+	void Derive() {
+        float dthis_da = 1; //(this->_id_children_a)->getValue();
+		auto current_partial_a = 1;  //getIDchildren()[0]->getPartial();
+		setPartial(current_partial_a + dthis_da * this->getPartial());
+        //setChildren(getChildren()[0]->Derive(), getIDchildren()[1]);  // when set up pointers to objects
+		std::array<int, 2> children;
+		children[0] = 1;
+		children[1] = 2;
+        setIDchildren(children);
+        //setIDchildren(getIDchildren()[0]->Derive(), getIDchildren()[1]);
 
-	void derive(){
-        dthis_da = np.ones(self.a.value.shape)
-        self.a.partial += dthis_da * self.partial
-        self.a.derive()
+		// this->children[0]->getPartial();
+		// this->children[0]->partial; // -> is for pointer of sorts
     }
 
 }; // END Add(Binary) class
@@ -187,16 +227,9 @@ class Symbol : public Expression { // x, y, ... single characters
 		std::array<std::string, 1> branches;  // branches to 2 children (always 2 children for simplicity)
 
 	public:
-		Symbol(std::string s, float v) {
-			_s = s;
-			_v = v;
-		}
 
 		std::array<std::string, 1> getChildren() { // TODO(Otis) check return type
 			return this->branches;
-		}
-		void getString() { // __str__ replacement
-			printf(this->_s);
 		}
 
 
@@ -217,6 +250,7 @@ class Number : public Expression { // literal number eg. the 2 in (x+2)
 //class X : public Symbol { // x
 //}; // END X(Symbol) class
 
-new = Symbol();
-new.setStringAndValue("x", 10);
+// syntax to define instance
+//new = Symbol();
+//new.setStringAndValue("x", 10);
 

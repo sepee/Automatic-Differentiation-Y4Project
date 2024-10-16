@@ -196,7 +196,7 @@ int ParseTreeStringIntoTree() {
 int main() {
 
 	std::string myfunctionstring = "x * x";
-	std::string myfunctionstring = "( ( (sin(x + 2) * x) ) * (x+3) )";
+	//std::string myfunctionstring = "( ( (sin(x + 2) * x) ) * (x+3) )";
 	auto[formatted_function_output, op_locate_dict_output] = FormatAndLocate(myfunctionstring);  // https://stackoverflow.com/questions/37876288/is-there-a-one-liner-to-unpack-tuple-pair-into-references
 
 	// next Parse ...
