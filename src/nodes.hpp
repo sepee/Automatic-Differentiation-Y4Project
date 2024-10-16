@@ -16,14 +16,18 @@ class BaseNode {
 	private:
 		int id;
 		int id_parent;
-		std::array<int, 2> id_children;
-		std::string derivative = "";  // or expression
-
+		//std::array<int, 2> id_children;
+		int id_children_a;
+		int id_children_b;
 
 		std::array<int, 2> Evaluate() {
 			// evaluate children, returns ids of children objects
 			return {0, 0};
 		};
+
+		void Differentiate() {
+			// forward differentiate
+		}
 
 		void Derive() {
 			// find derivative of this node (using children derivatives)
@@ -32,6 +36,15 @@ class BaseNode {
 		};
 
 	public:
+		BaseNode(int id) {  // Constructor - TODO(Catherine) define contructor with string and value for all classes
+			_id = id;
+		}
+
+		void getString() { // __str__ replacement
+			s = "";
+			// display string
+		}
+
 		std::string getDerivative() {
 			derivative = "something";  // TODO(Otis)
 			return derivative;
@@ -98,10 +111,14 @@ class Binary : public Operation {
 class Unary : public Operation {
 
 	private:
-		std::array<int, 1> id_children;
+		//int _id_children_a;
 		std::array<std::string, 1> branches;  // branches to 2 children (always 2 children for simplicity)
 
 	public:
+		void getString() {
+			printf("[UNARY OP]");
+		}
+
 		std::array<std::string, 1> getChildren() {
 			return this->branches;
 		}
@@ -110,6 +127,13 @@ class Unary : public Operation {
 }; // END Unary(Operation) class
 
 class Add : public Binary {
+
+
+	void derive(){
+        dthis_da = np.ones(self.a.value.shape)
+        self.a.partial += dthis_da * self.partial
+        self.a.derive()
+    }
 
 }; // END Add(Binary) class
 
@@ -145,7 +169,8 @@ class NaturalLog : public Unary {
 // ------------------------------ EXPRESSIONS --------------------------------------
 class Expression : public BaseNode {
 
-	//private:
+	private:
+		float value;
 
 	public:
 		std::array<int, 2> Evaluate() {
@@ -156,20 +181,28 @@ class Expression : public BaseNode {
 
 }; // END Expression class
 
-class Symbol : public Expression {
+class Symbol : public Expression { // x, y, ... single characters
 
 	private:
 		std::array<std::string, 1> branches;  // branches to 2 children (always 2 children for simplicity)
 
 	public:
+		Symbol(std::string s, float v) {
+			_s = s;
+			_v = v;
+		}
+
 		std::array<std::string, 1> getChildren() { // TODO(Otis) check return type
 			return this->branches;
+		}
+		void getString() { // __str__ replacement
+			printf(this->_s);
 		}
 
 
 }; // END Symbol(Expression) class
 
-class Number : public Expression {
+class Number : public Expression { // literal number eg. the 2 in (x+2)
 
 	private:
 		std::array<std::string, 1> branches;  // branches to 2 children (always 2 children for simplicity)
@@ -179,10 +212,11 @@ class Number : public Expression {
 			return this->branches;
 		}
 
-
 }; // END Number(Expression) class
 
-class X : public Symbol {
+//class X : public Symbol { // x
+//}; // END X(Symbol) class
 
-}; // END X(Symbol) class
+new = Symbol();
+new.setStringAndValue("x", 10);
 

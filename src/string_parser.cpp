@@ -154,9 +154,15 @@ format_and_locate_return_type FormatAndLocate(std::string function) {
 
 @returns root Reference (pointer) to root node
 */
-int ParseIntoTree(std::array<std::string, maximum_number_sections_and_ops> function_array, std::map<char, int[maximum_number_operations]> operations_locations_dict) {
+std::array<std::string, maximum_number_sections_and_ops> ParseIntoTreeString(std::array<std::string, maximum_number_sections_and_ops> function_array, std::map<char, int[maximum_number_operations]> operations_locations_dict) {
 
-	//do stuff - recursively?
+
+	// https://en.wikipedia.org/wiki/Shunting_yard_algorithm#:~:text=In%20computer%20science%2C%20the%20shunting,abstract%20syntax%20tree%20(AST).
+	
+	// undefined letters => create new Symbol object with this name
+
+	//do stuff
+	std::array<std::string, maximum_number_sections_and_ops> tree_string; // {"index-of-plus", "plus", "x", "2", ""
 
 	// !!! deal with brackets
 	// find brackets at deepest level, then do process on string inside those brackets
@@ -164,7 +170,7 @@ int ParseIntoTree(std::array<std::string, maximum_number_sections_and_ops> funct
 	// ...
 	// brackets around whole string for convenience => final iteration will cover the whole function
 
-
+	// eg. function ( ( (sin(x + 2) * x) ) * (x+3) )
 
 	// !!! multiplication and division from left to right
 
@@ -172,51 +178,30 @@ int ParseIntoTree(std::array<std::string, maximum_number_sections_and_ops> funct
 
 	// !!! deal with powers
 
+	return tree_string;
+};
+
+
+int ParseTreeStringIntoTree() {
+
+	// Shunting yard algorithm string into tree of nodes
+
+	// As I assign ids, create dictionary of ids and object maybe
+
 	return 0;  // return id of object?
 
 };
 
 
-
 int main() {
 
-	std::string myfunction = "x * x";
-	auto[formatted_function_output, op_locate_dict_output] = FormatAndLocate(myfunction);  // https://stackoverflow.com/questions/37876288/is-there-a-one-liner-to-unpack-tuple-pair-into-references
+	std::string myfunctionstring = "x * x";
+	std::string myfunctionstring = "( ( (sin(x + 2) * x) ) * (x+3) )";
+	auto[formatted_function_output, op_locate_dict_output] = FormatAndLocate(myfunctionstring);  // https://stackoverflow.com/questions/37876288/is-there-a-one-liner-to-unpack-tuple-pair-into-references
 
 	// next Parse ...
 	return 0;
-}
+};
 
 //TODO Create MakeFile !!!!!!!!
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
