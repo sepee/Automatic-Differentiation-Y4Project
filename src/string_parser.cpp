@@ -26,6 +26,11 @@ exp()
 ln()
 */
 
+// Type Definitions
+using formatted_function_output_type = std::array<std::string, maximum_number_sections_and_ops>;
+using op_locate_dict_output_type = std::map<char, std::array<int, maximum_number_operations>>;
+using format_locate_output_type = std::pair<formatted_function_output_type, op_locate_dict_output_type>;
+
 // constants
 constexpr int num_symbols = 6;
 
@@ -38,6 +43,74 @@ std::string cosine = "cos()";
 std::string exponential = "exp()";
 std::string ln = "ln()";
 
+/*
+@brief Rearrange function chunks. Each chunk is either an operation or an expression as a string.
+https://en.wikipedia.org/wiki/Shunting_yard_algorithm#:~:text=In%20computer%20science%2C%20the%20shunting,abstract%20syntax%20tree%20(AST)
+https://stackoverflow.com/questions/56547298/shunting-yard-algorithm-c
+https://www.youtube.com/watch?app=desktop&v=Q00iGR0JEqY
+
+@params function_chunks_in_order Function chunks in order of original function string.
+
+@returns output Formatted function chunks for Shunting Yard algorithm.
+*/
+formatted_function_output_type ShuntingYard(formatted_function_output_type function_chunks_in_order) {
+	// forgetting brackets
+	formatted_function_output_type output;
+	int output_index = 0;
+	formatted_function_output_type stack;
+	int stack_index = 0;
+
+	std::string chunk;
+	for (int chunk_id = 0; chunk_id < maximum_number_sections_and_ops; chunk_id++) {
+		chunk = function_chunks_in_order[chunk_id];
+		printf("Chunk: %s\n", chunk.c_str());
+		if (chunk == "+" || chunk == "-" || chunk == "*" || chunk == "/") {  // Binary
+			if (stack[stack_index-1] == "+" || stack[stack_index-1] == "-" || stack[stack_index-1] == "*" || stack[stack_index-1] == "/") {
+				printf("Popping: Adding to output: %s\n", chunk.c_str());
+				output[output_index++] = stack[stack_index--];
+			}
+			printf("Adding to stack: %s\n", chunk.c_str());
+			stack[stack_index++] = chunk;
+		} else if (chunk == "sin" || chunk == "cos" || chunk == "exp" || chunk == "ln") {  //Unary
+			printf("Adding to stack: %s\n", chunk.c_str());
+			stack[stack_index++] = chunk;
+		} else if (chunk == "(") {
+			printf("Adding to stack: %s\n", chunk.c_str());
+			stack[stack_index++] = chunk;
+		} else if (chunk == ")") {
+			printf("\nPopping stack\n");
+			for (int s = stack_index-1; s >= 0; s--) {  // add stack to output in forward or reverse order
+				printf("Stack[s] %s\n", stack[s].c_str());
+			}
+			printf("\n");
+			int count = 0;
+			for (int s = stack_index-1; s >= 0; s--) {  // add stack to output in forward or reverse order
+				printf("Stack[s] %s\n", stack[s].c_str());
+				if (stack[s] == "(") {
+					count++;
+					if (count == 2) {
+						printf("Stack[s-1] %s\n", stack[s-1].c_str());
+						stack_index = s; // the next index to populate in the stack
+						break;
+					}
+				} else {
+					printf("Popping: Adding to output: %s\n", stack[s].c_str());
+					output[output_index++] = stack[s];
+				}
+			}
+		} else if (chunk == "") {
+			continue;
+		} else {
+			printf("Adding to output: %s\n", chunk.c_str());
+			output[output_index++] = chunk;
+		}
+	}
+	for (int s = stack_index-1; s >= 0; s--) {  // add stack to output in forward or reverse order
+		output[output_index++] = stack[s];
+	}
+	return output;
+}
+
 
 using format_and_locate_return_type = std::pair< std::array<std::string, maximum_number_sections_and_ops> , std::map<char, std::array<int, maximum_number_operations>> >; 
 /*
@@ -48,6 +121,8 @@ using format_and_locate_return_type = std::pair< std::array<std::string, maximum
 @returns formatted_function Formatted function.
 */
 format_and_locate_return_type FormatAndLocate(std::string function) {
+
+	function = "(" + function + ")";
 
 	std::array<std::string, maximum_number_sections_and_ops> formatted_function;
 	std::array<std::string, maximum_number_sections_and_ops>* formatted_function_pointer = &formatted_function;
@@ -96,9 +171,18 @@ format_and_locate_return_type FormatAndLocate(std::string function) {
 
 	std::string section = "";
 
+	printf("Function input:");
+	printf("%s", function.c_str());
+	printf("\n");
 	// TODO(Catherine) Refactor since lots of duplication
 	for (char& c : function) {  // or without &
-
+		//for (int f = 0; f < 2*maximum_number_operations; f++) {  // or without &
+		printf("Next section:");
+		printf("%s", section.c_str());
+		printf("\n");
+		printf("Character:");
+		printf("%c", c);
+		printf("\n");
 		if (c == '+' || c == '-' || c == '*' || c == '/') {  // reduces number of if conditions?
 			
 			full_str_function = full_str_function + " " + c + " ";
@@ -110,39 +194,56 @@ format_and_locate_return_type FormatAndLocate(std::string function) {
 			if (c == '+') {
 				op_locate_dict['+'][next_op_i_add] = str_index;
 				next_op_i_add++;
+				formatted_function[f_func_i++] = "+";
 			} else if (c == '-') {
 				op_locate_dict['-'][next_op_i_sub] = str_index;
 				next_op_i_sub++;
+				formatted_function[f_func_i++] = "-";
 			} else if (c == '*') {
 				op_locate_dict['*'][next_op_i_mul] = str_index;
 				next_op_i_mul++;
+				formatted_function[f_func_i++] = "*";
 			} else if (c == '/') {
 				op_locate_dict['/'][next_op_i_div] = str_index;
 				next_op_i_div++;
+				formatted_function[f_func_i++] = "/";
 			}
 
 		} else if (c == '(') {
+			formatted_function[f_func_i++] = section;  // assigns section then incrememts f_func_i since ++ after
+			section = "";
+
 			full_str_function = full_str_function + c + " ";
 			op_locate_dict[')'][next_op_i_obracket] = str_index;
 			next_op_i_obracket++;
-			formatted_function[f_func_i++] = section;
-			section = "";
+			formatted_function[f_func_i++] = "(";
 		} else if (c == ')') {
+			formatted_function[f_func_i++] = section;  // assigns section then incrememts f_func_i since ++ after
+			section = "";
+
 			full_str_function = full_str_function + " " + c;
 			op_locate_dict[')'][next_op_i_cbracket] = str_index;
 			next_op_i_cbracket++;
-			formatted_function[f_func_i++] = section;
-			section = "";
-
+			formatted_function[f_func_i++] = ")";
 		} else {
+			// TODO(Catherine): Check ^ , i.e. turn ^ into multiple multiplications
+			printf("else\n");
 			full_str_function = full_str_function + c;
 			section = section + c;
+			//if (section == "") {
+			//	printf("Break\n");
+			//	break;
+			//}
 		}
 
-		str_index++;
+		str_index++;  // use to get number of total chunks/sections
 	}
 
-	return std::make_pair(formatted_function, op_locate_dict);
+	// Format for Shunting Yard Algorithm
+	// https://en.wikipedia.org/wiki/Shunting_yard_algorithm#:~:text=In%20computer%20science%2C%20the%20shunting,abstract%20syntax%20tree%20(AST).
+	formatted_function_output_type formatted_function_reordered = ShuntingYard(formatted_function);
+
+	return std::make_pair(formatted_function_reordered, op_locate_dict);
 
 };
 
@@ -157,7 +258,6 @@ format_and_locate_return_type FormatAndLocate(std::string function) {
 std::array<std::string, maximum_number_sections_and_ops> ParseIntoTreeString(std::array<std::string, maximum_number_sections_and_ops> function_array, std::map<char, int[maximum_number_operations]> operations_locations_dict) {
 
 
-	// https://en.wikipedia.org/wiki/Shunting_yard_algorithm#:~:text=In%20computer%20science%2C%20the%20shunting,abstract%20syntax%20tree%20(AST).
 	
 	// undefined letters => create new Symbol object with this name
 
@@ -194,11 +294,20 @@ int ParseTreeStringIntoTree() {
 
 
 int main() {
-
-	std::string myfunctionstring = "x * x";
+	printf("Starting MAIN...\n");
+	//std::string myfunctionstring = "sin(x)*x";  // do not want spaces
+	std::string myfunctionstring = "sin(cos(2 3)/3*9)";  // do not want spaces - TODO(Catherine): Add space strip to formatter
 	//std::string myfunctionstring = "( ( (sin(x + 2) * x) ) * (x+3) )";
-	auto[formatted_function_output, op_locate_dict_output] = FormatAndLocate(myfunctionstring);  // https://stackoverflow.com/questions/37876288/is-there-a-one-liner-to-unpack-tuple-pair-into-references
-
+	format_locate_output_type format_and_locate_output = FormatAndLocate(myfunctionstring);  // https://stackoverflow.com/questions/37876288/is-there-a-one-liner-to-unpack-tuple-pair-into-references
+	
+	formatted_function_output_type formatted_function_output = format_and_locate_output.first;
+	op_locate_dict_output_type op_locate_dict_output = format_and_locate_output.second;
+	printf("Formatted function chunks (with Shunting Yard):");
+	for (int f = 0; f<maximum_number_sections_and_ops; f++){
+		printf("%s", formatted_function_output[f].c_str());
+		printf(",");
+	}
+	printf("\n");
 	// next Parse ...
 	return 0;
 };

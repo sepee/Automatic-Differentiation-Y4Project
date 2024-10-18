@@ -3,6 +3,8 @@
 #include <string>
 #include <array>
 
+// using namespace std;
+
 //#include <eigen3/Eigen>  // for working with vectors and matrices later
 
 // DECLARATIONS
