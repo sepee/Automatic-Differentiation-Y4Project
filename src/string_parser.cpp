@@ -65,9 +65,11 @@ formatted_function_output_type ShuntingYard(formatted_function_output_type funct
 		chunk = function_chunks_in_order[chunk_id];
 		printf("Chunk: %s\n", chunk.c_str());
 		if (chunk == "+" || chunk == "-" || chunk == "*" || chunk == "/") {  // Binary
+			printf("stack[stack_index-1]: %s \n", stack[stack_index-1].c_str());
 			if (stack[stack_index-1] == "+" || stack[stack_index-1] == "-" || stack[stack_index-1] == "*" || stack[stack_index-1] == "/") {
-				printf("Popping: Adding to output: %s\n", chunk.c_str());
-				output[output_index++] = stack[stack_index--];
+				printf("Popping: Adding to output: %s\n", stack[stack_index-1].c_str());
+				output[output_index++] = stack[stack_index-1];
+				stack_index--;
 			}
 			printf("Adding to stack: %s\n", chunk.c_str());
 			stack[stack_index++] = chunk;
@@ -84,6 +86,7 @@ formatted_function_output_type ShuntingYard(formatted_function_output_type funct
 			}
 			printf("\n");
 			int count = 0;
+			printf("stack_index = %d \n", stack_index);
 			for (int s = stack_index-1; s >= 0; s--) {  // add stack to output in forward or reverse order
 				printf("Stack[s] %s\n", stack[s].c_str());
 				if (stack[s] == "(") {
@@ -91,6 +94,9 @@ formatted_function_output_type ShuntingYard(formatted_function_output_type funct
 					if (count == 2) {
 						printf("Stack[s-1] %s\n", stack[s-1].c_str());
 						stack_index = s; // the next index to populate in the stack
+						break;
+					} else if (count == 1 && s == 0) {
+						stack_index = s;
 						break;
 					}
 				} else {
@@ -104,9 +110,15 @@ formatted_function_output_type ShuntingYard(formatted_function_output_type funct
 			printf("Adding to output: %s\n", chunk.c_str());
 			output[output_index++] = chunk;
 		}
-	}
-	for (int s = stack_index-1; s >= 0; s--) {  // add stack to output in forward or reverse order
-		output[output_index++] = stack[s];
+
+		// Check stack and output
+		printf("\n Displaying current stack and output at end of iteration:\n");
+		for (int s = stack_index-1; s >= 0; s--) {  // add stack to output in forward or reverse order
+			printf("Stack[s] %s\n", stack[s].c_str());
+		}
+		for (int o = 0; o < output_index; o++) {  // add stack to output in forward or reverse order
+			printf("Output[o] %s\n", output[o].c_str());
+		}
 	}
 	return output;
 }
@@ -282,13 +294,13 @@ std::array<std::string, maximum_number_sections_and_ops> ParseIntoTreeString(std
 };
 
 
-int ParseTreeStringIntoTree() {
+int ParseTreeStringIntoTree(formatted_function_output_type formatted_function_output) {
 
 	// Shunting yard algorithm string into tree of nodes
 
 	// As I assign ids, create dictionary of ids and object maybe
 
-	return 0;  // return id of object?
+	return 0;  // return id of object? or pointer to first object
 
 };
 
@@ -296,8 +308,9 @@ int ParseTreeStringIntoTree() {
 int main() {
 	printf("Starting MAIN...\n");
 	//std::string myfunctionstring = "sin(x)*x";  // do not want spaces
-	std::string myfunctionstring = "sin(cos(2 3)/3*9)";  // do not want spaces - TODO(Catherine): Add space strip to formatter
+	//std::string myfunctionstring = "sin(cos(2 3)/3*9)";  // do not want spaces - TODO(Catherine): Add space strip to formatter
 	//std::string myfunctionstring = "( ( (sin(x + 2) * x) ) * (x+3) )";
+	std::string myfunctionstring = "3+4*2/(1-5)";  // need to add precedences
 	format_locate_output_type format_and_locate_output = FormatAndLocate(myfunctionstring);  // https://stackoverflow.com/questions/37876288/is-there-a-one-liner-to-unpack-tuple-pair-into-references
 	
 	formatted_function_output_type formatted_function_output = format_and_locate_output.first;
@@ -309,6 +322,10 @@ int main() {
 	}
 	printf("\n");
 	// next Parse ...
+
+	// integer of pointer - see return statement inside function
+	int result = ParseTreeStringIntoTree(formatted_function_output_type formatted_function_output);
+
 	return 0;
 };
 
