@@ -17,3 +17,6 @@ wednesday 16th oct 2024:
         - use of graphics can help this a lot
         - for neural networks, they dont need to know the details, only that we are minimising the cost function of a "guesser" function. (try and make it guess better)
         - in new year FOCUS on presentation, refining, refining, refining
+
+ideas:
+    - Look at numerical optimization for finding maximum a posteriori (MAP) estimators in Bayesian statistics.
