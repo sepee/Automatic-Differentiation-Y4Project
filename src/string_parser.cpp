@@ -54,7 +54,7 @@ https://www.youtube.com/watch?app=desktop&v=Q00iGR0JEqY
 @returns output Formatted function chunks for Shunting Yard algorithm.
 */
 formatted_function_output_type ShuntingYard(formatted_function_output_type function_chunks_in_order) {
-	// forgetting brackets
+	// forgetting brackets around whole function and ^ not implemented
 	formatted_function_output_type output;
 	int output_index = 0;
 	formatted_function_output_type stack;
@@ -64,12 +64,31 @@ formatted_function_output_type ShuntingYard(formatted_function_output_type funct
 	for (int chunk_id = 0; chunk_id < maximum_number_sections_and_ops; chunk_id++) {
 		chunk = function_chunks_in_order[chunk_id];
 		printf("Chunk: %s\n", chunk.c_str());
-		if (chunk == "+" || chunk == "-" || chunk == "*" || chunk == "/") {  // Binary
-			printf("stack[stack_index-1]: %s \n", stack[stack_index-1].c_str());
-			if (stack[stack_index-1] == "+" || stack[stack_index-1] == "-" || stack[stack_index-1] == "*" || stack[stack_index-1] == "/") {
-				printf("Popping: Adding to output: %s\n", stack[stack_index-1].c_str());
-				output[output_index++] = stack[stack_index-1];
+		// if (chunk == "+" || chunk == "-" || chunk == "*" || chunk == "/") {  // Binary
+		// 	printf("stack[stack_index-1]: %s \n", stack[stack_index-1].c_str());
+		// 	if (stack[stack_index-1] == "+" || stack[stack_index-1] == "-" || stack[stack_index-1] == "*" || stack[stack_index-1] == "/") {
+		// 		printf("Popping: Adding to output: %s\n", stack[stack_index-1].c_str());
+		// 		output[output_index++] = stack[stack_index-1];
+		// 		stack_index--;
+		// 	}
+		// 	printf("Adding to stack: %s\n", chunk.c_str());
+		// 	stack[stack_index++] = chunk;
+		if (chunk == "+" || chunk == "-") {  // Binary  // chunk precedence <= this precedence NEVER
+			printf("Adding to stack: %s\n", chunk.c_str());
+			stack[stack_index++] = chunk;
+		} else if (chunk == "*" || chunk == "/") {  // Binary
+			int i = 1;
+			printf("stack[stack_index-1]: %s \n", stack[stack_index-i].c_str());
+			while ((stack[stack_index-i] == "*" || stack[stack_index-i] == "/") && (stack_index-i >= 0)) {  // chunk precedence <= this precedence
+				printf("INSIDE WHILE LOOP \n");
+				printf("stack_index = %d \n", stack_index);
+				printf("Popping: Adding to output: %s\n", stack[stack_index-i].c_str());
+				output[output_index++] = stack[stack_index-i];
 				stack_index--;
+				//i = i-1;
+				if (stack_index-i < 0) {
+					break;
+				}
 			}
 			printf("Adding to stack: %s\n", chunk.c_str());
 			stack[stack_index++] = chunk;
@@ -310,7 +329,9 @@ int main() {
 	//std::string myfunctionstring = "sin(x)*x";  // do not want spaces
 	//std::string myfunctionstring = "sin(cos(2 3)/3*9)";  // do not want spaces - TODO(Catherine): Add space strip to formatter
 	//std::string myfunctionstring = "( ( (sin(x + 2) * x) ) * (x+3) )";
-	std::string myfunctionstring = "3+4*2/(1-5)";  // need to add precedences
+	//std::string myfunctionstring = "3+4*2/(1-5)";  // need to add precedences  // GOAL: 3 4 2 × 1 5 − ÷ +
+	std::string myfunctionstring = "4+4*2/(1-5)";  // GOAL: 4 4 2 * 1 5 - / +
+	//std::string myfunctionstring = "(a+b)*c";  // GOAL: a b c * +
 	format_locate_output_type format_and_locate_output = FormatAndLocate(myfunctionstring);  // https://stackoverflow.com/questions/37876288/is-there-a-one-liner-to-unpack-tuple-pair-into-references
 	
 	formatted_function_output_type formatted_function_output = format_and_locate_output.first;
@@ -324,7 +345,7 @@ int main() {
 	// next Parse ...
 
 	// integer of pointer - see return statement inside function
-	int result = ParseTreeStringIntoTree(formatted_function_output_type formatted_function_output);
+	//int result = ParseTreeStringIntoTree(formatted_function_output_type formatted_function_output);
 
 	return 0;
 };
