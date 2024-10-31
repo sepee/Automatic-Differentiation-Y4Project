@@ -44,6 +44,24 @@ std::string exponential = "exp()";
 std::string ln = "ln()";
 
 /*
+DOCSTRING 
+*/
+formatted_function_output_type ReverseChunks(formatted_function_output_type formatted_function_output, int number_chunks) {
+	formatted_function_output_type prep_for_tree_function_output;
+	std::string chunk;
+	int i = 0;
+	for (int n = number_chunks; n >= 0; n--) {
+		chunk = formatted_function_output[n];
+		if (chunk == "") {
+			continue;
+		} else {
+			prep_for_tree_function_output[i++] = chunk;
+		}
+	}
+	return prep_for_tree_function_output;
+};
+
+/*
 @brief Rearrange function chunks. Each chunk is either an operation or an expression as a string.
 https://en.wikipedia.org/wiki/Shunting_yard_algorithm#:~:text=In%20computer%20science%2C%20the%20shunting,abstract%20syntax%20tree%20(AST)
 https://stackoverflow.com/questions/56547298/shunting-yard-algorithm-c
@@ -53,7 +71,7 @@ https://www.youtube.com/watch?app=desktop&v=Q00iGR0JEqY
 
 @returns output Formatted function chunks for Shunting Yard algorithm.
 */
-formatted_function_output_type ShuntingYard(formatted_function_output_type function_chunks_in_order) {
+std::pair<formatted_function_output_type, int> ShuntingYard(formatted_function_output_type function_chunks_in_order) {
 	// forgetting brackets around whole function and ^ not implemented
 	formatted_function_output_type output;
 	int output_index = 0;
@@ -139,7 +157,7 @@ formatted_function_output_type ShuntingYard(formatted_function_output_type funct
 			printf("Output[o] %s\n", output[o].c_str());
 		}
 	}
-	return output;
+	return std::make_pair(output, output_index);
 }
 
 
@@ -272,7 +290,8 @@ format_and_locate_return_type FormatAndLocate(std::string function) {
 
 	// Format for Shunting Yard Algorithm
 	// https://en.wikipedia.org/wiki/Shunting_yard_algorithm#:~:text=In%20computer%20science%2C%20the%20shunting,abstract%20syntax%20tree%20(AST).
-	formatted_function_output_type formatted_function_reordered = ShuntingYard(formatted_function);
+	std::pair<formatted_function_output_type, int> formatted_function_shunting_yard = ShuntingYard(formatted_function);
+	formatted_function_output_type formatted_function_reordered = ReverseChunks(formatted_function_shunting_yard.first, formatted_function_shunting_yard.second);
 
 	return std::make_pair(formatted_function_reordered, op_locate_dict);
 
@@ -312,12 +331,115 @@ std::array<std::string, maximum_number_sections_and_ops> ParseIntoTreeString(std
 	return tree_string;
 };
 
+void displayTree(std::array<BaseNode*, maximum_number_sections_and_ops> nodes_array, int number_nodes) {
+	BaseNode* n;
+	for (int i = 0; i < number_nodes; i++) {
+		n = nodes_array[i];
+		printf("Index=%d", i);
+		n->getString();
+		printf("\n\n");
+	}
+}
+
+bool isNumber(std::string test_string) {
+	bool result = true;
+	for (char& character : test_string) {
+		if (character == '1' || character == '2' || character == '3' || character == '4' || character == '5' || character == '6' || character == '7' || character == '8' || character == '9' || character == '.') {
+			result = result && true;
+		} else {
+			result = result && false;
+		}
+	}
+	return result;
+}
 
 int ParseTreeStringIntoTree(formatted_function_output_type formatted_function_output) {
-
 	// Shunting yard algorithm string into tree of nodes
+	int id = 0;
+	std::array<int, maximum_number_sections_and_ops> childrenNeeded;  // array of children still needed for node with id = index of this array (decrement children needed as process)
+	std::array<BaseNode*, maximum_number_sections_and_ops> nodes;
+	BaseNode* node;
+	for (std::string c : formatted_function_output) {
+		printf("id = %d \n", id);
+		if (c == "") {
+			break;
+		} else if (c == "+" || c == "-" || c == "*" || c == "/") {
+			childrenNeeded[id] = 2;
+			if (c == "+") {
+				Add* node;
+			} else if (c == "-") {
+				Subtract* node;
+			} else if (c == "*") {
+				Multiply* node;
+			} else if (c == "/") {
+				Divide* node;
+			}
+		} else if (c == "sin" || c == "cos" || c == "ln" || c == "exp") {
+			childrenNeeded[id] = 1;
+			if (c == "sin") {
+				Sin* node;
+			} else if (c == "cos") {
+				Cos* node;
+			} else if (c == "ln") {
+				NaturalLog* node;
+			} else if (c == "exp") {
+				Exponential* node;
+			}
+		} else {
+			if (isNumber(c)) {
+				Number* node;
+				node->setString(c);
+				node->setValue(std::stoi(c));
+			} else {
+				Symbol* node;
+				node->setString(c);
+			}
+		}
+		node->setID(id);
+		nodes[id] = node;
+		/*
+		if (childrenNeeded[id] == 2) {
+			std::array<int, 2> children;
+			children[0] = id-2;
+			children[1] = id-1;
+			node->setIDchildren(children);
+		} else if (childrenNeeded[id] == 1) {
+			std::array<int, 2> children;
+			children[0] = id-1;
+			node->setIDchildren(children);
+		}
+		*/
+		printf("childrenNeeded[id-1]=%d\n", childrenNeeded[id-1]);
+		if (id > 1) {
+			if (childrenNeeded[id-1] == 2) {
+				nodes[id-1]->setIDfirstChild(id);
+				printf("Set me as first child of %d\n", id-1);
+				childrenNeeded[id-1]--;
+			}
+			if (childrenNeeded[id-2] == 2) {
+				nodes[id-2]->setIDsecondChild(id);
+				printf("Set me as second child of %d\n", id-2);
+				childrenNeeded[id-2]--;
+			}
+			if (childrenNeeded[id-1] == 1) {  // when node is sin or cos
+				nodes[id-1]->setIDfirstChild(id);
+				printf("Set me as first child of %d\n", id-1);
+				childrenNeeded[id-1]--;
+			}
+		} else if (id > 0) {  // when first node is sin or cos
+			if (childrenNeeded[id-1] == 1 || childrenNeeded[id-1] == 2) { 
+				nodes[id-1]->setIDfirstChild(id);
+				printf("Set me as first child of %d\n", id-1);
+				childrenNeeded[id-1]--;
+			}
+		}
+
+		id++;
+	}
 
 	// As I assign ids, create dictionary of ids and object maybe
+
+	displayTree(nodes, id);
 
 	return 0;  // return id of object? or pointer to first object
 
@@ -330,8 +452,8 @@ int main() {
 	//std::string myfunctionstring = "sin(cos(2 3)/3*9)";  // do not want spaces - TODO(Catherine): Add space strip to formatter
 	//std::string myfunctionstring = "( ( (sin(x + 2) * x) ) * (x+3) )";
 	//std::string myfunctionstring = "3+4*2/(1-5)";  // need to add precedences  // GOAL: 3 4 2 × 1 5 − ÷ +
-	std::string myfunctionstring = "4+4*2/(1-5)";  // GOAL: 4 4 2 * 1 5 - / +
-	//std::string myfunctionstring = "(a+b)*c";  // GOAL: a b c * +
+	//std::string myfunctionstring = "4+4*2/(1-5)";  // GOAL: 4 4 2 * 1 5 - / +
+	std::string myfunctionstring = "(a+b)*c";  // GOAL: a b c * +
 	format_locate_output_type format_and_locate_output = FormatAndLocate(myfunctionstring);  // https://stackoverflow.com/questions/37876288/is-there-a-one-liner-to-unpack-tuple-pair-into-references
 	
 	formatted_function_output_type formatted_function_output = format_and_locate_output.first;
@@ -345,7 +467,7 @@ int main() {
 	// next Parse ...
 
 	// integer of pointer - see return statement inside function
-	//int result = ParseTreeStringIntoTree(formatted_function_output_type formatted_function_output);
+	int result = ParseTreeStringIntoTree(formatted_function_output);
 
 	return 0;
 };

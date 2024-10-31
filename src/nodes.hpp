@@ -111,6 +111,14 @@ class BaseNode {
 			this->_id_children_a = c[0];
 			this->_id_children_b = c[1];
 		}
+
+		void setIDfirstChild(int c) {
+			this->_id_children_a = c;
+		}
+
+		void setIDsecondChild(int c) {
+			this->_id_children_b = c;
+		}
 		
 }; // END BaseNode class
 
@@ -135,6 +143,10 @@ class Binary : public Operation {
 		std::array<std::string, 2> branches;  // branches to 2 children (always 2 children for simplicity)
 
 	public:
+		void getString() {
+			printf("[BINARY OP]");
+		}
+
 		std::array<std::string, 2> getChildren() {
 			return this->branches;
 		}
@@ -145,7 +157,7 @@ class Binary : public Operation {
 class Unary : public Operation {
 
 	private:
-		//int _id_children_a;
+		int _id_children_a;
 		std::array<std::string, 1> branches;  // branches to 2 children (always 2 children for simplicity)
 
 	public:
@@ -157,10 +169,25 @@ class Unary : public Operation {
 			return this->branches;
 		}
 
+		std::array<int, 1> getIDchildren() {
+			std::array<int, 1> children;
+			children[0] = this->_id_children_a;
+			return children;
+		}
+
+		void setIDchildren(std::array<int, 1> c) {
+			this->_id_children_a = c[0];
+		}
+
 
 }; // END Unary(Operation) class
 
 class Add : public Binary {
+
+
+	void getString() {
+		printf("[%d] + [%d]", this->getIDchildren()[0], this->getIDchildren()[1]);
+	}
 
 	void Derive() {
         float dthis_da = 1; //(this->_id_children_a)->getValue();
@@ -180,31 +207,45 @@ class Add : public Binary {
 }; // END Add(Binary) class
 
 class Subtract : public Binary {
-
+	void getString() {
+		printf("[%d] - [%d]", this->getIDchildren()[0], this->getIDchildren()[1]);
+	}
 }; // END Subtract(Binary) class
 
 class Multiply : public Binary {
-
+	void getString() {
+		printf("[%d] * [%d]", this->getIDchildren()[0], this->getIDchildren()[1]);
+	}
 }; // END Multiply(Binary) class
 
 class Divide : public Binary {
-
+	void getString() {
+		printf("[%d] / [%d]", this->getIDchildren()[0], this->getIDchildren()[1]);
+	}
 }; // END Divide(Binary) class
 
 class Sin : public Unary {
-
+	void getString() {
+		printf("sin([%d])", this->getIDchildren()[0]);
+	}
 }; // END Sin(Unary) class
 
 class Cos : public Unary {
-
+	void getString() {
+		printf("cos([%d])", this->getIDchildren()[0]);
+	}
 }; // END Cos(Unary) class
 
 class Exponential : public Unary {
-
+	void getString() {
+		printf("exp([%d])", this->getIDchildren()[0]);
+	}
 }; // END Exponential(Unary) class
 
 class NaturalLog : public Unary {
-
+	void getString() {
+		printf("ln([%d])", this->getIDchildren()[0]);
+	}
 }; // END NaturalLog(Unary) class
 
 
@@ -226,9 +267,13 @@ class Expression : public BaseNode {
 class Symbol : public Expression { // x, y, ... single characters
 
 	private:
+		std::string _s;
 		std::array<std::string, 1> branches;  // branches to 2 children (always 2 children for simplicity)
 
 	public:
+		void getString() {
+			printf(" %s ", this->_s);
+		}
 
 		std::array<std::string, 1> getChildren() { // TODO(Otis) check return type
 			return this->branches;
@@ -240,9 +285,14 @@ class Symbol : public Expression { // x, y, ... single characters
 class Number : public Expression { // literal number eg. the 2 in (x+2)
 
 	private:
+		std::string _s;
 		std::array<std::string, 1> branches;  // branches to 2 children (always 2 children for simplicity)
 
 	public:
+		void getString() {
+			printf(" %s ", this->_s);
+		}
+
 		std::array<std::string, 1> getChildren() {
 			return this->branches;
 		}
