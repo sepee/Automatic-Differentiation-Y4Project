@@ -9,6 +9,9 @@ class expression:
 
     def diff():
         return "(expression value, expression derivative)"
+    
+    def eval(self):
+        return "cannot evaluate base expression"
 
 # Base Expression Types
     
