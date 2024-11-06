@@ -11,3 +11,12 @@ suggestions:
         - specifically look at vector calc related to it
     - make automaic tree diagram of graph
         - animate this tree diagram to show steps of the algorithm
+
+wednesday 16th oct 2024:
+    - think about how to get audience to "think they understand"
+        - use of graphics can help this a lot
+        - for neural networks, they dont need to know the details, only that we are minimising the cost function of a "guesser" function. (try and make it guess better)
+        - in new year FOCUS on presentation, refining, refining, refining
+
+ideas:
+    - Look at numerical optimization for finding maximum a posteriori (MAP) estimators in Bayesian statistics.
