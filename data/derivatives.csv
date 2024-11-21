@@ -1,0 +1,9 @@
+function derivative
+k 0
+x 1
+sin cos
+cos -sin
+exp exp
+ln 1/x
+sinh cosh
+cosh sinh
