@@ -1,0 +1,19 @@
+INFERRED ACTION POINTS:
+    Theoretical foundations:
+        - describe better how topological sorting prevents dependancy of a function on its output
+        - define clearly what an "input" is to a function
+        - label variables in figure 2.1 (1st computational graph example)
+        - de-emphasize non-tree graphs wrt ordering (not a particular problem)
+    Algorithms:
+        - improve notation w' (since not clear for multiple variables which this is a derivative with respect to). maybe change to dw/dxi everywhere to be unambiguous
+        - expand on what forward mode does at each step, how exactly does it use the chain rule
+        - mention used formulation of the chain rule, as version used in algorithms section was not mentioned in theoretical foundations.
+        - improve explanation of figure 3.1 (how shown quantities are computed, and in which order perhaps?)
+
+
+history section - history of work to date, would funciton as lit review section
+
+main takeaway - missing detail. Go into the exact processes and calculations/ derivations. This includes algorithms section and applications.
+also needs quite a few more references.
+
+include authors + package names for computer packages
