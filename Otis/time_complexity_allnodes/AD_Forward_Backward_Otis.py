@@ -118,7 +118,10 @@ class Neg_Op_fb(Un_Op_fb):
         val_partial_a = self.a.derive_forward()
         return (-val_partial_a[0], -val_partial_a[1])
     def derive_symbolic(self, var):
-        return Neg_Op_fb(self.a.derive_symbolic(var))
+        da_dx = self.a.derive_symbolic(var)
+        if type(da_dx) == Const_Exp_fb and da_dx.a == 0:
+            return Const_Exp_fb(0)
+        return Neg_Op_fb(da_dx)
     
 class Sin_Op_fb(Un_Op_fb):
     def __str__(self):
@@ -134,7 +137,11 @@ class Sin_Op_fb(Un_Op_fb):
         val_partial_a = self.a.derive_forward()
         return (np.sin(val_partial_a[0]), np.cos(val_partial_a[0]) * val_partial_a[1])
     def derive_symbolic(self, var):
-        return Mult_Op_fb(Cos_Op_fb(self.a), self.a.derive_symbolic(var))
+        da_dx = self.a.derive_symbolic(var)
+        if type(da_dx) == Const_Exp_fb and da_dx.a == 0:
+            return Const_Exp_fb(0)
+        
+        return Mult_Op_fb(Cos_Op_fb(self.a), da_dx)
 
 class Cos_Op_fb(Un_Op_fb):
     def __str__(self):
@@ -150,7 +157,10 @@ class Cos_Op_fb(Un_Op_fb):
         val_partial_a = self.a.derive_forward()
         return (np.sin(val_partial_a[0]), np.cos(val_partial_a[0]) * val_partial_a[1])
     def derive_symbolic(self, var):
-        return Mult_Op_fb(Neg_Op_fb(Sin_Op_fb(self.a)), self.a.derive_symbolic(var))
+        da_dx = self.a.derive_symbolic(var)
+        if type(da_dx) == Const_Exp_fb and da_dx.a == 0:
+            return Const_Exp_fb(0)
+        return Mult_Op_fb(Neg_Op_fb(Sin_Op_fb(self.a)), da_dx)
         
 class Exp_Op_fb(Un_Op_fb):
     def __str__(self):
@@ -166,7 +176,10 @@ class Exp_Op_fb(Un_Op_fb):
         val_partial_a = self.a.derive_forward()
         return (np.exp(val_partial_a[0]), np.exp(val_partial_a[0]) * val_partial_a[1])
     def derive_symbolic(self, var):
-        return Mult_Op_fb(Exp_Op_fb(self.a), self.a.derive_symbolic(var))
+        da_dx = self.a.derive_symbolic(var)
+        if type(da_dx) == Const_Exp_fb and da_dx.a == 0:
+            return Const_Exp_fb(0)        
+        return Mult_Op_fb(Exp_Op_fb(self.a), da_dx)
 
 # Binary Operations
 class Add_Op_fb(Bi_Op_fb):
@@ -185,7 +198,15 @@ class Add_Op_fb(Bi_Op_fb):
         val_partial_b = self.b.derive_forward()
         return (val_partial_a[0] + val_partial_b[0], val_partial_a[1] + val_partial_b[1])    
     def derive_symbolic(self, var):
-        return Add_Op_fb(self.a.derive_symbolic(var), self.b.derive_symbolic(var))
+        da_dx = self.a.derive_symbolic(var)
+        db_dx = self.b.derive_symbolic(var)
+        if type(da_dx) == Const_Exp_fb and da_dx.a == 0:
+            if type(db_dx) == Const_Exp_fb and db_dx.a == 0:
+                return Const_Exp_fb(0)       
+            return db_dx
+        if type(db_dx) == Const_Exp_fb and db_dx.a == 0:
+            return da_dx   
+        return Add_Op_fb(da_dx, db_dx)
     
 class Sub_Op_fb(Bi_Op_fb):
     def __str__(self):
@@ -203,7 +224,15 @@ class Sub_Op_fb(Bi_Op_fb):
         val_partial_b = self.b.derive_forward()
         return (val_partial_a[0] - val_partial_b[0], val_partial_a[1] - val_partial_b[1])   
     def derive_symbolic(self, var):
-        return Sub_Op_fb(self.a.derive_symbolic(var), self.b.derive_symbolic(var))
+        da_dx = self.a.derive_symbolic(var)
+        db_dx = self.b.derive_symbolic(var)
+        if type(da_dx) == Const_Exp_fb and da_dx.a == 0:
+            if type(db_dx) == Const_Exp_fb and db_dx.a == 0:
+                return Const_Exp_fb(0)       
+            return Neg_Op_fb(db_dx) 
+        if type(db_dx) == Const_Exp_fb and db_dx.a == 0:
+            return da_dx   
+        return Sub_Op_fb(da_dx, db_dx)
     
 class Mult_Op_fb(Bi_Op_fb):
     def __str__(self):
@@ -221,12 +250,20 @@ class Mult_Op_fb(Bi_Op_fb):
         val_partial_b = self.b.derive_forward()
         return (val_partial_a[0] * val_partial_b[0], val_partial_a[1] * val_partial_b[0] + val_partial_b[1] * val_partial_a[0]) 
     def derive_symbolic(self, var):
-        return Add_Op_fb(Mult_Op_fb(self.a, self.b.derive_symbolic(var)), Mult_Op_fb(self.b, self.a.derive_symbolic(var)))
+        da_dx = self.a.derive_symbolic(var)
+        db_dx = self.b.derive_symbolic(var)
+        if type(da_dx) == Const_Exp_fb and da_dx.a == 0:
+            if type(db_dx) == Const_Exp_fb and db_dx.a == 0:
+                return Const_Exp_fb(0)       
+            return Mult_Op_fb(self.a, db_dx)
+        if type(db_dx) == Const_Exp_fb and db_dx.a == 0:
+            return Mult_Op_fb(self.b, da_dx)
+        return Add_Op_fb(Mult_Op_fb(self.a, db_dx), Mult_Op_fb(self.b, da_dx))
 #quick test code
 
-#x_1 = Var_fb("x_1", 2.0)
-#x_2 = Var_fb("x_2", 3.0)
-#
+x_1 = Var_fb("x_1", 2.0)
+x_2 = Var_fb("x_2", 3.0)
+
 #func = Add_Op_fb(Mult_Op_fb(x_1, x_2), Sin_Op_fb(x_2))
 #
 ##func.eval()
@@ -236,6 +273,6 @@ class Mult_Op_fb(Bi_Op_fb):
 ##print("dx_2 f", x_2.partial)
 #
 #print(func)
+#print(x_1.derive_symbolic(x_1))
 #print(func.derive_symbolic(x_1))
-
-
+        
