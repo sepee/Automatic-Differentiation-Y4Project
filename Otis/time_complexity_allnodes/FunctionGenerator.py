@@ -3,7 +3,7 @@ import numpy as np
 import random
 
 Bi_Op_types = [AD.Add_Op_fb, AD.Sub_Op_fb, AD.Mult_Op_fb]
-Un_Op_types = [AD.Sin_Op_fb]
+Un_Op_types = [AD.Sin_Op_fb, AD.Cos_Op_fb, AD.Neg_Op_fb]
 
 def generate_random_function_b(complexity, vars):
     if complexity==1:

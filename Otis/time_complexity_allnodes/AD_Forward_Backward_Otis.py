@@ -260,7 +260,7 @@ class Mult_Op_fb(Bi_Op_fb):
     def derive_symbolic(self, var):
         da_dx = self.a.derive_symbolic(var)
         db_dx = self.b.derive_symbolic(var)
-        simplification_idx = int(type(da_dx) == Const_Exp_fb and da_dx.a == 0) + int(type(db_dx) == Const_Exp_fb and db_dx.a == 0)*2 + int(type(da_dx) == Const_Exp_fb and da_dx.a == 1)*4 + int(type(db_dx) == Const_Exp_fb and da_dx.a == 1)*8
+        simplification_idx = int(type(da_dx) == Const_Exp_fb and da_dx.a == 0) + int(type(db_dx) == Const_Exp_fb and db_dx.a == 0)*2 + int(type(da_dx) == Const_Exp_fb and da_dx.a == 1)*4 + int(type(db_dx) == Const_Exp_fb and db_dx.a == 1)*8
         match simplification_idx:
             case 0:
                 return Add_Op_fb(Mult_Op_fb(self.a, db_dx), Mult_Op_fb(self.b, da_dx))
