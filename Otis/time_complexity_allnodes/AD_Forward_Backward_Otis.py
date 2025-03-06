@@ -119,8 +119,8 @@ class Neg_Op_fb(Un_Op_fb):
         return (-val_partial_a[0], -val_partial_a[1])
     def derive_symbolic(self, var):
         da_dx = self.a.derive_symbolic(var)
-        if type(da_dx) == Const_Exp_fb and da_dx.a == 0:
-            return Const_Exp_fb(0)
+        if type(da_dx) == Const_Exp_fb:
+            Const_Exp_fb(-da_dx.a)
         return Neg_Op_fb(da_dx)
     
 class Sin_Op_fb(Un_Op_fb):
@@ -138,9 +138,11 @@ class Sin_Op_fb(Un_Op_fb):
         return (np.sin(val_partial_a[0]), np.cos(val_partial_a[0]) * val_partial_a[1])
     def derive_symbolic(self, var):
         da_dx = self.a.derive_symbolic(var)
-        if type(da_dx) == Const_Exp_fb and da_dx.a == 0:
-            return Const_Exp_fb(0)
-        
+        if type(da_dx) == Const_Exp_fb:
+            if da_dx.a == 0:
+                return Const_Exp_fb(0)              
+            if da_dx.a == 1:
+                return Cos_Op_fb(self.a)   
         return Mult_Op_fb(Cos_Op_fb(self.a), da_dx)
 
 class Cos_Op_fb(Un_Op_fb):
@@ -158,8 +160,11 @@ class Cos_Op_fb(Un_Op_fb):
         return (np.sin(val_partial_a[0]), np.cos(val_partial_a[0]) * val_partial_a[1])
     def derive_symbolic(self, var):
         da_dx = self.a.derive_symbolic(var)
-        if type(da_dx) == Const_Exp_fb and da_dx.a == 0:
-            return Const_Exp_fb(0)
+        if type(da_dx) == Const_Exp_fb:
+            if da_dx.a == 0:
+                return Const_Exp_fb(0)              
+            if da_dx.a == 1:
+                return Neg_Op_fb(Sin_Op_fb(self.a))    
         return Mult_Op_fb(Neg_Op_fb(Sin_Op_fb(self.a)), da_dx)
         
 class Exp_Op_fb(Un_Op_fb):
@@ -177,8 +182,11 @@ class Exp_Op_fb(Un_Op_fb):
         return (np.exp(val_partial_a[0]), np.exp(val_partial_a[0]) * val_partial_a[1])
     def derive_symbolic(self, var):
         da_dx = self.a.derive_symbolic(var)
-        if type(da_dx) == Const_Exp_fb and da_dx.a == 0:
-            return Const_Exp_fb(0)        
+        if type(da_dx) == Const_Exp_fb:
+            if da_dx.a == 0:
+                return Const_Exp_fb(0)              
+            if da_dx.a == 1:
+                return Exp_Op_fb(self.a)      
         return Mult_Op_fb(Exp_Op_fb(self.a), da_dx)
 
 # Binary Operations
@@ -252,18 +260,52 @@ class Mult_Op_fb(Bi_Op_fb):
     def derive_symbolic(self, var):
         da_dx = self.a.derive_symbolic(var)
         db_dx = self.b.derive_symbolic(var)
-        if type(da_dx) == Const_Exp_fb and da_dx.a == 0:
-            if type(db_dx) == Const_Exp_fb and db_dx.a == 0:
-                return Const_Exp_fb(0)       
-            return Mult_Op_fb(self.a, db_dx)
-        if type(db_dx) == Const_Exp_fb and db_dx.a == 0:
-            return Mult_Op_fb(self.b, da_dx)
-        return Add_Op_fb(Mult_Op_fb(self.a, db_dx), Mult_Op_fb(self.b, da_dx))
+        simplification_idx = int(type(da_dx) == Const_Exp_fb and da_dx.a == 0) + int(type(db_dx) == Const_Exp_fb and db_dx.a == 0)*2 + int(type(da_dx) == Const_Exp_fb and da_dx.a == 1)*4 + int(type(db_dx) == Const_Exp_fb and da_dx.a == 1)*8
+        match simplification_idx:
+            case 0:
+                return Add_Op_fb(Mult_Op_fb(self.a, db_dx), Mult_Op_fb(self.b, da_dx))
+            case 1:
+                return Mult_Op_fb(self.a, db_dx)
+            case 2:
+                return Mult_Op_fb(self.b, da_dx)
+            case 3:
+                return Const_Exp_fb(0)
+            case 4:
+                return Add_Op_fb(Mult_Op_fb(self.a, db_dx), self.b)
+            case 5:
+                raise Exception("0 = 1!")
+            case 6:
+                return self.b
+            case 7:
+                return Exception("0 = 1!")
+            case 8:
+                return Add_Op_fb(self.a, Mult_Op_fb(self.b, da_dx))
+            case 9:
+                return self.a
+            case 10:
+                raise Exception("0 = 1!")
+            case 11:
+                return Exception("0 = 1!")
+            case 12:
+                return Add_Op_fb(self.a, self.b)
+            case 13:
+                raise Exception("0 = 1!")
+            case 14:
+                raise Exception("0 = 1!")
+            case 15:
+                return Exception("0 = 1!")
+            
 #quick test code
-
 x_1 = Var_fb("x_1", 2.0)
 x_2 = Var_fb("x_2", 3.0)
 
+func = Add_Op_fb(Sin_Op_fb(Mult_Op_fb(Const_Exp_fb(2), x_1)),Cos_Op_fb(Add_Op_fb(x_1, x_2)))
+df_dx1 = func.derive_symbolic(x_1)
+df_dx2 = func.derive_symbolic(x_2)
+
+print(func)
+print(df_dx1)
+print(df_dx2)
 #func = Add_Op_fb(Mult_Op_fb(x_1, x_2), Sin_Op_fb(x_2))
 #
 ##func.eval()
@@ -272,7 +314,6 @@ x_2 = Var_fb("x_2", 3.0)
 ##print("dx_1 f", x_1.partial)
 ##print("dx_2 f", x_2.partial)
 #
-#print(func)
-#print(x_1.derive_symbolic(x_1))
-#print(func.derive_symbolic(x_1))
+
+
         
