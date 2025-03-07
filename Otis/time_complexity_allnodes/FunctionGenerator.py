@@ -25,6 +25,8 @@ def generate_random_function_b(complexity, vars):
             new_node = AD.Un_Op_fb(subtree[0])
             return [new_node] + subtree
         else:
+            # find complexities and numbers of leaf nodes for children that satisfy bound l <= (c+1)/2.
+            # this is done through trial and error
             c_a = 1
             c_b = c - c_a - 1
             l_a = 1

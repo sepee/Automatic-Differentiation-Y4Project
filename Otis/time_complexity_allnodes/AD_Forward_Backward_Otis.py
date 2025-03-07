@@ -1,10 +1,4 @@
 import numpy as np
-#import random, time
-#import matplotlib.pyplot as plt
-#import sympy as sp
-#from tqdm import tqdm
-#import seaborn as sns
-#import pandas as pd
 
 # Node Classes
 
@@ -20,18 +14,23 @@ class expression_fb:
     def __str__(self):
         return "e" 
 
+    # function evaluation method
     def eval(self):
         self.partial = 0
         return "CANT EVALUATE BASE EXPRESSION CLASS"
-
+    
+    # backward mode AD backward pass method
     def derive():
         return "CANT BACKWARD-DERIVE OF BASE EXPRESSION CLASS"
-    
+   
+    # forward mode AD differentiation method
     def derive_forward():
         '''
         Returns a tuple (value, partial)
         '''
         return "CANT FORWARD-DERIVE OF BASE EXPRESSION CLASS"
+    
+    # symbolic differentiation method
     def derive_symbolic(self, var_name):
         return "CANT DIFFERENTIATE BASE EXPRESSION CLASS"
 
